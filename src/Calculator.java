@@ -5,9 +5,7 @@ public class Calculator {
 
     private long lastValue;
     private long value;
-
-
-
+    private String valueBitString;
     private String valueString;
     private MemSize memorySize;
     private NumSystem system;
@@ -16,7 +14,6 @@ public class Calculator {
     private Map<String, Long> hexINput = new HashMap<>();
     public Display display = new Display(this);
     public static class Operations {
-
 
         public enum Direction {
             LEFT, RIGHT
@@ -178,7 +175,7 @@ public class Calculator {
         this.system = NumSystem.DEC;
         this.current = 0;
         this.value = 0;
-        this.valueString = "0";
+        this.valueString = "";
         allowedInput.put("BIN", Arrays.asList("0", "1"));
         allowedInput.put("OCT", Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7"));
         allowedInput.put("DEC", Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"));
@@ -198,7 +195,10 @@ public class Calculator {
     }
 
     public void setSystem(NumSystem system) {
+        System.out.println(value);
+        valueString = Long.toString(value, system.toInt()).toUpperCase();
         this.system = system;
+        display.setDisplayLabel(valueString);
     }
 
     public void setCurrent(long current) {
@@ -214,11 +214,12 @@ public class Calculator {
     public void clear() {
         current = 0;
         value = 0;
-        valueString = "0";
+        valueString = "";
         display.setDisplayLabel(valueString);
     }
 
     public void numericInput(String input) {
+
         StringBuilder builder = new StringBuilder(valueString);
         switch (system){
             case BIN:
@@ -237,7 +238,7 @@ public class Calculator {
                 break;
             case DEC:
                 if (allowedInput.get("DEC").contains(input)){
-                    lastValue = value;;
+                    lastValue = value;
                     valueString = builder.append(input).toString();
                     value = Long.parseLong(valueString, 10);
                 }
@@ -251,8 +252,15 @@ public class Calculator {
                 break;
         }
         //System.out.println("12");
-        //System.out.println("Value string"+valueString);
+        //System.out.println("Value string"+valueString);\
+        //todo test
+         if (valueString.charAt(0) == '0' && valueString.length()>1){
+             valueString = valueString.substring(1);
+         }
         display.setDisplayLabel(valueString);
+    }
+    public void changeSign(){
+
     }
 
 }

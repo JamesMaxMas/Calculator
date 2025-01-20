@@ -317,16 +317,16 @@ public class TestMain {
     @Test
     public void testSystemChangeOperationsString() {
 
-        calc.setSystem(NumSystem.stringToNumSystem("BIN"));
+        calc.setSystem(NumSystem.stringToNumSystem("Bin"));
         assertEquals(NumSystem.BIN, calc.getSystem());
 
-        calc.setSystem(NumSystem.stringToNumSystem("DEC"));
+        calc.setSystem(NumSystem.stringToNumSystem("Dec"));
         assertEquals(NumSystem.DEC, calc.getSystem());
 
-        calc.setSystem(NumSystem.stringToNumSystem("OCT"));
+        calc.setSystem(NumSystem.stringToNumSystem("Oct"));
         assertEquals(NumSystem.OCT, calc.getSystem());
 
-        calc.setSystem(NumSystem.stringToNumSystem("HEX"));
+        calc.setSystem(NumSystem.stringToNumSystem("Hex"));
         assertEquals(NumSystem.HEX, calc.getSystem());
     }
     @Test
@@ -342,13 +342,13 @@ public class TestMain {
     }
     @Test
     public void testMemorySizeString() {
-        calc.setMemorySize(MemSize.stringToMemSize("BYTE"));
+        calc.setMemorySize(MemSize.stringToMemSize("Byte"));
         assertEquals(MemSize.BYTE, calc.getMemorySize());
-        calc.setMemorySize(MemSize.stringToMemSize("WORD"));
+        calc.setMemorySize(MemSize.stringToMemSize("Word"));
         assertEquals(MemSize.WORD, calc.getMemorySize());
-        calc.setMemorySize(MemSize.stringToMemSize("DWORD"));
+        calc.setMemorySize(MemSize.stringToMemSize("Dword"));
         assertEquals(MemSize.DWORD, calc.getMemorySize());
-        calc.setMemorySize(MemSize.stringToMemSize("QWORD"));
+        calc.setMemorySize(MemSize.stringToMemSize("Qword"));
         assertEquals(MemSize.QWORD, calc.getMemorySize());
     }
     @Test

@@ -3,16 +3,25 @@ public enum NumSystem {
 
     static NumSystem stringToNumSystem(String str) {
         switch (str) {
-            case "DEC":
+            case "Dec":
                 return DEC;
-            case "BIN":
+            case "Bin":
                 return BIN;
-            case "OCT":
+            case "Oct":
                 return OCT;
-            case "HEX":
+            case "Hex":
                 return HEX;
             default:
                 throw new IllegalArgumentException("Unknown operation: " + str);
+        }
+    }
+    public int toInt() {
+        switch (this) {
+            case DEC : return 10;
+            case BIN : return 2;
+            case OCT : return 8;
+            case HEX : return 16;
+            default : return 0;
         }
     }
 }

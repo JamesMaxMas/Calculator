@@ -26,27 +26,16 @@ public enum MemSize {
         }
     }
 
-    static public boolean stringIsMemSize(String str) {
-        switch (str) {
-            case "BYTE":
-            case "WORD":
-            case "DWORD":
-            case "QWORD":
-                return true;
-            default:
-                return false;
-        }
-    }
 
     static public MemSize stringToMemSize(String str) {
         switch (str) {
-            case "BYTE":
+            case "Byte":
                 return BYTE;
-            case "WORD":
+            case "Word":
                 return WORD;
-            case "DWORD":
+            case "Dword":
                 return DWORD;
-            case "QWORD":
+            case "Qword":
                 return QWORD;
             default:
                 throw new IllegalArgumentException("Unknown operation: " + str);
