@@ -1,9 +1,20 @@
+import javax.swing.*;
 import java.util.*;
-
+import java.util.function.Function;
+@FunctionalInterface
+interface TriFunction<T, U, V, R> {
+    R apply(T t, U u, V v);
+}
+//todo funkcje pamięci kalkulatora i E
 public class Calculator {
 
-
+    private boolean nextResetDisplay;
     private long lastValue;
+
+    public void setValue(long value) {
+        this.value = value;
+    }
+
     private long value;
     private String valueBitString;
     private String valueString;
@@ -13,173 +24,58 @@ public class Calculator {
     public Map<String, List<String>> allowedInput = new HashMap<>();
     private Map<String, Long> hexINput = new HashMap<>();
     public Display display = new Display(this);
-    public static class Operations {
+//    TriFunction<Long, Long, Long, MemSize> action;
+    Action action;
 
-        public enum Direction {
-            LEFT, RIGHT
+
+
+    public void wykonaj(){
+//        System.out.println(this.value);
+//        System.out.println(this.current);
+//        System.out.println(value);
+
+        this.value = action.wykonaj(this.current,this.value, this.memorySize);
+
+        if (system == NumSystem.DEC){
+            valueString = Long.toString(value, system.toInt()).toUpperCase();
+        }else {
+            valueString = Long.toUnsignedString(value, system.toInt()).toUpperCase();
         }
-
-        public static long add(long a, long b, MemSize memSize) {
-            switch (memSize) {
-                case BYTE:
-                    return (byte) ((byte) a + (byte) b);
-                case WORD:
-                    return (short) ((short) a + (short) b);
-                case DWORD:
-                    return ((int) a + (int) b);
-                default:
-                    return a + b; // QWORD
-            }
+//        System.out.println("valueString");
+//        System.out.println(valueString);
+//        System.out.println(value);
+        if (valueString.charAt(0) == '0' && valueString.length()>1){
+            valueString = valueString.substring(1);
         }
+        display.setDisplayLabel(valueString);
 
-        public static long subtract(long a, long b, MemSize memSize) {
-            switch (memSize) {
-                case BYTE:
-                    return (byte) ((byte) a - (byte) b);
-                case WORD:
-                    return (short) ((short) a - (short) b);
-                case DWORD:
-                    return ((int) a - (int) b);
-                default:
-                    return a - b; // QWORD
-            }
-        }
+    }
+    public void addAction(
+            Action a
+    ){
+        action = a;
+        this.current = value;
+        nextResetDisplay = true;
 
-        public static long multiply(long a, long b, MemSize memSize) {
-            switch (memSize) {
-                case BYTE:
-                    return (byte) ((byte) a * (byte) b);
-                case WORD:
-                    return (short) ((short) a * (short) b);
-                case DWORD:
-                    return (int) ((int) a * (int) b);
-                default:
-                    return a * b; // QWORD
-            }
-        }
 
-        public static long divide(long a, long b, MemSize memSize) {
-            switch (memSize) {
-                case BYTE:
-
-                    return (byte) ((byte) a / (byte) b);
-                case WORD:
-                    return (short) ((short) a / (short) b);
-                case DWORD:
-                    return (int) ((int) a / (int) b);
-                default:
-                    return a / b; // QWORD
-            }
-        }
-
-        public static long changeSign(long a) {
-            return -a;
-        }
-
-        public static long OR(long a, long b, MemSize memSize) {
-            switch (memSize) {
-                case BYTE:
-                    return (byte) ((byte) a | (byte) b);
-                case WORD:
-                    return (short) ((short) a | (short) b);
-                case DWORD:
-                    return (int) ((int) a | (int) b);
-                default:
-                    return a | b; // QWORD
-            }
-        }
-
-        public static long AND(long a, long b, MemSize memSize) {
-            switch (memSize) {
-                case BYTE:
-                    return (byte) ((byte) a & (byte) b);
-                case WORD:
-                    return (short) ((short) a & (short) b);
-                case DWORD:
-                    return (int) ((int) a & (int) b);
-                default:
-                    return a & b; // QWORD
-            }
-        }
-
-        public static long XOR(long a, long b, MemSize memSize) {
-            switch (memSize) {
-                case BYTE:
-                    return (byte) ((byte) a ^ (byte) b);
-                case WORD:
-                    return (short) ((short) a ^ (short) b);
-                case DWORD:
-                    return (int) ((int) a ^ (int) b);
-                default:
-                    return a ^ b; // QWORD
-            }
-        }
-
-        public static long NOT(long a, MemSize memSize) {
-            switch (memSize) {
-                case BYTE:
-                    return (byte) ~((byte) a);
-                case WORD:
-                    return (short) ~((short) a);
-                case DWORD:
-                    return (int) ~((int) a);
-                default:
-                    return ~a; // QWORD
-            }
-        }
-
-        public static long bitShift(Direction direction, long a, MemSize size) {
-            long result = 0;
-            if (direction == Direction.LEFT) {
-                result = a << 1;
-                if ((a & size.mostSignificantBit()) == size.mostSignificantBit()) {
-                    result |= 1;
-                }
-            } else {
-                result = a >> 1;
-                if ((a & 1) == 1) {
-                    result |= size.mostSignificantBit();
-                }
-            }
-            return result;
-        }
-
-        public static long bitShift(Direction direction, long a, int amount, MemSize size) {
-            if (amount >= size.toInt()) {
-                throw new ArithmeticException("Size ERR!");
-            }
-
-            if (direction == Direction.LEFT) {
-                return a << amount;
-            } else {
-                return a >> amount;
-            }
-        }
-
-        public static long mod(long a, long b, MemSize memSize) {
-            switch (memSize) {
-                case BYTE:
-                    return (byte) ((byte) a % (byte) b);
-                case WORD:
-                    return (short) ((short) a % (short) b);
-                case DWORD:
-                    return (int) ((int) a % (int) b);
-                default:
-                    return a % b; // QWORD
-            }
-        }
     }
 
     public Calculator() {
         this.memorySize = MemSize.QWORD;
         this.system = NumSystem.DEC;
+//        setSystem(NumSystem.DEC);
+//        setMemorySize(MemSize.QWORD);
         this.current = 0;
         this.value = 0;
-        this.valueString = "";
+        this.valueString = "0";
+        nextResetDisplay = false;
         allowedInput.put("BIN", Arrays.asList("0", "1"));
         allowedInput.put("OCT", Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7"));
         allowedInput.put("DEC", Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"));
         allowedInput.put("HEX", Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"));
+
+        //display.display();
+        display.update();
     }
 
     public MemSize getMemorySize() {
@@ -188,6 +84,8 @@ public class Calculator {
 
     public void setMemorySize(MemSize memorySize) {
         this.memorySize = memorySize;
+        display.update();
+        nextResetDisplay = true;
     }
 
     public NumSystem getSystem() {
@@ -195,8 +93,12 @@ public class Calculator {
     }
 
     public void setSystem(NumSystem system) {
-        System.out.println(value);
-        valueString = Long.toString(value, system.toInt()).toUpperCase();
+        //System.out.println(value);
+        if (system == NumSystem.DEC){
+            valueString = Long.toString(value, system.toInt()).toUpperCase();
+        }else {
+            valueString = Long.toUnsignedString(value, system.toInt()).toUpperCase();
+        }
         this.system = system;
         display.setDisplayLabel(valueString);
     }
@@ -214,12 +116,17 @@ public class Calculator {
     public void clear() {
         current = 0;
         value = 0;
-        valueString = "";
+        valueString = "0";
         display.setDisplayLabel(valueString);
     }
 
     public void numericInput(String input) {
-
+        if (nextResetDisplay){
+            nextResetDisplay = false;
+            value = 0;
+            valueString = "0";
+            display.setDisplayLabel(valueString);
+        }
         StringBuilder builder = new StringBuilder(valueString);
         switch (system){
             case BIN:
@@ -250,9 +157,35 @@ public class Calculator {
                     value = Long.parseLong(valueString, 16);
                 }
                 break;
+
         }
-        //System.out.println("12");
-        //System.out.println("Value string"+valueString);\
+        switch (memorySize) {
+            case BYTE:
+                if (value >= 128){
+                    value = lastValue;
+                    valueString = Long.toString(value, system.toInt());
+                }
+                break;
+            case WORD:
+                if (value >= 32767){
+                    value = lastValue;
+                    valueString = Long.toString(value, system.toInt());
+                }
+                break;
+            case DWORD:
+                if (value >= 2147483647){
+                    value = lastValue;
+                    valueString = Long.toString(value, system.toInt());
+                }
+                break;
+            case QWORD:
+                if (value >= 9223372036854775807L){
+                    value = lastValue;
+                    valueString = Long.toString(value, system.toInt());
+                }
+                break;
+        }
+
         //todo test
          if (valueString.charAt(0) == '0' && valueString.length()>1){
              valueString = valueString.substring(1);
@@ -260,6 +193,35 @@ public class Calculator {
         display.setDisplayLabel(valueString);
     }
     public void changeSign(){
+        if (system == NumSystem.DEC){
+            value = -value;
+            valueString = Long.toString(value, system.toInt()).toUpperCase();
+        }else {
+            value = -value;
+//            System.out.println(value);
+//            String s = Long.toBinaryString(value);
+//            int desiredLength = memorySize.toInt();
+//            if (s.length() > desiredLength) {
+//                s = s.substring(s.length() - desiredLength);
+//            }
+//            System.out.println(s);
+//            valueString = s;//= Long.toString(value, system.toInt());
+//            long i2 = Long.parseUnsignedLong(valueString, 2); // Parsowanie jako liczby bez znaku
+//            System.out.println(i2);
+//            if ((i2 & (1L << 63)) != 0) { // Sprawdzanie, czy najwyższy bit jest ustawiony
+//                i2 = i2 - (1L << 64); // Korekcja dla liczby ujemnej
+//            }
+//            if (value < 0 ){
+//                i2+=1;
+//            }
+//            value = i2;
+            valueString = Long.toUnsignedString(value, system.toInt()).toUpperCase();
+        }
+
+        if (valueString.charAt(0) == '0' && valueString.length()>1){
+            valueString = valueString.substring(1);
+        }
+        display.setDisplayLabel(valueString);
 
     }
 
