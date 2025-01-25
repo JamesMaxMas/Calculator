@@ -1,16 +1,11 @@
 import javax.swing.*;
 import java.util.*;
-import java.util.function.Function;
-@FunctionalInterface
-interface TriFunction<T, U, V, R> {
-    R apply(T t, U u, V v);
-}
-//todo funkcje pamięci kalkulatora i E
+//todo funkcje pamięci kalkulatora
 public class Calculator {
 
     private boolean nextResetDisplay;
     private long lastValue;
-
+    private long memory;
     public void setValue(long value) {
         this.value = value;
     }
@@ -24,47 +19,32 @@ public class Calculator {
     public Map<String, List<String>> allowedInput = new HashMap<>();
     private Map<String, Long> hexINput = new HashMap<>();
     public Display display = new Display(this);
-//    TriFunction<Long, Long, Long, MemSize> action;
     Action action;
 
 
 
     public void wykonaj(){
-//        System.out.println(this.value);
-//        System.out.println(this.current);
-//        System.out.println(value);
-
         this.value = action.wykonaj(this.current,this.value, this.memorySize);
-
         if (system == NumSystem.DEC){
             valueString = Long.toString(value, system.toInt()).toUpperCase();
         }else {
             valueString = Long.toUnsignedString(value, system.toInt()).toUpperCase();
         }
-//        System.out.println("valueString");
-//        System.out.println(valueString);
-//        System.out.println(value);
         if (valueString.charAt(0) == '0' && valueString.length()>1){
             valueString = valueString.substring(1);
         }
         display.setDisplayLabel(valueString);
 
     }
-    public void addAction(
-            Action a
-    ){
+    public void addAction(Action a){
         action = a;
         this.current = value;
         nextResetDisplay = true;
-
-
     }
 
     public Calculator() {
         this.memorySize = MemSize.QWORD;
         this.system = NumSystem.DEC;
-//        setSystem(NumSystem.DEC);
-//        setMemorySize(MemSize.QWORD);
         this.current = 0;
         this.value = 0;
         this.valueString = "0";
@@ -73,7 +53,6 @@ public class Calculator {
         allowedInput.put("OCT", Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7"));
         allowedInput.put("DEC", Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"));
         allowedInput.put("HEX", Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"));
-
         //display.display();
         display.update();
     }
@@ -93,12 +72,25 @@ public class Calculator {
     }
 
     public void setSystem(NumSystem system) {
-        //System.out.println(value);
+//        System.out.println(value);
+        value = memorySize.convertValue(value);
+//        System.out.println(value);
         if (system == NumSystem.DEC){
             valueString = Long.toString(value, system.toInt()).toUpperCase();
         }else {
+            String s = Long.toBinaryString(value);
+            int desiredLength = memorySize.toInt();
+             if (s.length() > desiredLength) {
+                s = s.substring(s.length() - desiredLength);
+             }
+            System.out.println(s);
+            long i2 = Long.parseUnsignedLong(s, 2); // Parsowanie jako liczby bez znaku
+            System.out.println(i2);
+            value = i2;
             valueString = Long.toUnsignedString(value, system.toInt()).toUpperCase();
+
         }
+        System.out.println(valueString);
         this.system = system;
         display.setDisplayLabel(valueString);
     }
@@ -113,12 +105,7 @@ public class Calculator {
     public String getValueString() {
         return valueString;
     }
-    public void clear() {
-        current = 0;
-        value = 0;
-        valueString = "0";
-        display.setDisplayLabel(valueString);
-    }
+
 
     public void numericInput(String input) {
         if (nextResetDisplay){
@@ -186,43 +173,118 @@ public class Calculator {
                 break;
         }
 
-        //todo test
          if (valueString.charAt(0) == '0' && valueString.length()>1){
              valueString = valueString.substring(1);
          }
         display.setDisplayLabel(valueString);
     }
     public void changeSign(){
+        value = -value;
         if (system == NumSystem.DEC){
-            value = -value;
             valueString = Long.toString(value, system.toInt()).toUpperCase();
         }else {
-            value = -value;
-//            System.out.println(value);
-//            String s = Long.toBinaryString(value);
-//            int desiredLength = memorySize.toInt();
-//            if (s.length() > desiredLength) {
-//                s = s.substring(s.length() - desiredLength);
-//            }
-//            System.out.println(s);
-//            valueString = s;//= Long.toString(value, system.toInt());
-//            long i2 = Long.parseUnsignedLong(valueString, 2); // Parsowanie jako liczby bez znaku
-//            System.out.println(i2);
-//            if ((i2 & (1L << 63)) != 0) { // Sprawdzanie, czy najwyższy bit jest ustawiony
-//                i2 = i2 - (1L << 64); // Korekcja dla liczby ujemnej
-//            }
-//            if (value < 0 ){
-//                i2+=1;
-//            }
-//            value = i2;
+            String s = Long.toBinaryString(value);
+            int desiredLength = memorySize.toInt();
+            if (s.length() > desiredLength) {
+                s = s.substring(s.length() - desiredLength);
+            }
+            System.out.println(s);
+            long i2 = Long.parseUnsignedLong(s, 2); // Parsowanie jako liczby bez znaku
+            System.out.println(i2);
+            value = i2;
             valueString = Long.toUnsignedString(value, system.toInt()).toUpperCase();
-        }
 
+        }
+        System.out.println(valueString);
+        this.system = system;
+        display.setDisplayLabel(valueString);
         if (valueString.charAt(0) == '0' && valueString.length()>1){
             valueString = valueString.substring(1);
         }
         display.setDisplayLabel(valueString);
 
     }
+
+    public void clear() {
+        current = 0;
+        value = 0;
+        valueString = "0";
+        action = null;
+        display.setDisplayLabel(valueString);
+    }
+        //todo test
+    public void mc() {
+        memory = 0;
+    }
+    public void calculateValueString(){
+        if (system == NumSystem.DEC){
+            valueString = Long.toString(value, system.toInt()).toUpperCase();
+        }else {
+            String s = Long.toBinaryString(value);
+            int desiredLength = memorySize.toInt();
+            if (s.length() > desiredLength) {
+                s = s.substring(s.length() - desiredLength);
+            }
+            System.out.println(s);
+            long i2 = Long.parseUnsignedLong(s, 2); // Parsowanie jako liczby bez znaku
+            System.out.println(i2);
+            value = i2;
+            valueString = Long.toUnsignedString(value, system.toInt()).toUpperCase();
+        }
+    }
+    // Memory Recall (MR): odczytuje pamięć
+    public void mr() {
+        value =  memory;
+        calculateValueString();
+        display.setDisplayLabel(valueString);
+    }
+
+    // Memory Store (MS): zapisuje aktualny wpis do pamięci
+    public void ms() {
+        memory = value;
+    }
+
+    // Memory Add (M+): dodaje aktualny wpis do pamięci
+    public void mPlus() {
+        memory += value;
+    }
+
+    // Memory Subtract (M-): odejmuje aktualny wpis od pamięci
+    public void mMinus() {
+        memory -= value;
+    }
+
+    // Clear Entry (CE): czyści bieżące dane
+    public void ce() {
+        value=0;
+        valueString = "0";
+        display.setDisplayLabel(valueString);
+    }
+
+    public void backspace() {
+        calculateValueString();
+        if (!valueString.isEmpty()) {
+            valueString = valueString.substring(0, valueString.length() - 1);
+        }
+        value = Long.parseLong(valueString, system.toInt());
+        display.setDisplayLabel(valueString);
+    }
+    public void RoL(){
+        value = Operations.bitShift(Operations.Direction.LEFT,value,  memorySize);
+        calculateValueString();
+        display.setDisplayLabel(valueString);
+    }
+    public void RoR(){
+        value = Operations.bitShift(Operations.Direction.RIGHT,value,  memorySize);
+        calculateValueString();
+        display.setDisplayLabel(valueString);
+    }
+    public void Not(){
+        value = Operations.NOT(value, memorySize);
+        calculateValueString();
+        display.setDisplayLabel(valueString);
+    }
+
+
 
 }

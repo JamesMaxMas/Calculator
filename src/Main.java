@@ -9,8 +9,8 @@ public class Main {
     public static void main(String[] args) {
         Calculator calc = new Calculator();
         calc.display.display();
-        String s = "9999999999999999999";
-        long l = Long.parseLong(s, 10);
+//        String s = "9999999999999999999";
+//        long l = Long.parseLong(s, 10);
 //        String s = Long.toBinaryString(-5);
 //        int desiredLength = 8;
 //        if (s.length() > desiredLength) {

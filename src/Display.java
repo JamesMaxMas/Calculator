@@ -30,27 +30,25 @@ public class Display {
         addButton(buttonPanel, "", (e -> calc.numericInput("")));
         addButton(buttonPanel, "Mod", (e -> calc.addAction(new MOD())));
         addButton(buttonPanel, "A", (e -> calc.numericInput("A")));
-        addButton(buttonPanel, "MC", (e -> calc.numericInput("")));//todo
-        addButton(buttonPanel, "MR", (e -> calc.numericInput("")));//todo
-        addButton(buttonPanel, "MS", (e -> calc.numericInput("")));//todo
-        addButton(buttonPanel, "M+", (e -> calc.numericInput("")));//todo
-        addButton(buttonPanel, "M-", (e -> calc.numericInput("")));//todo
+        addButton(buttonPanel, "MC", (e -> calc.mc()));
+        addButton(buttonPanel, "MR", (e -> calc.mr()));
+        addButton(buttonPanel, "MS", (e -> calc.ms()));
+        addButton(buttonPanel, "M+", (e -> calc.mPlus()));
+        addButton(buttonPanel, "M-", (e -> calc.mMinus()));
         startX = 10;
         startY += buttonHeight+gapY;
         addButton(buttonPanel, "(", (e -> calc.numericInput("")));//todo
         addButton(buttonPanel, ")", (e -> calc.numericInput("")));//todo
         addButton(buttonPanel, "B", (e -> calc.numericInput("B")));
-        addButton(buttonPanel, "<--", (e -> calc.numericInput("")));//todo
-        addButton(buttonPanel, "CE", (e -> calc.numericInput("")));//todo
+        addButton(buttonPanel, "<--", (e -> calc.backspace()));
+        addButton(buttonPanel, "CE", (e -> calc.ce()));
         addButton(buttonPanel, "C", (e -> calc.clear()));
-        //addButton(buttonPanel, "+/-", (e -> this.setDisplayLabel(Long.toString(Operations.changeSign(calc.getValue()), calc.getSystem().toInt()))));
         addButton(buttonPanel, "+/-", (e -> calc.changeSign()));
-//        Long.toString(value, system.toInt()).toUpperCase();
         addButton(buttonPanel, "v--", (e -> calc.numericInput("")));
         startX = 10;
         startY += buttonHeight+gapY;
-        addButton(buttonPanel, "RoL", (e -> calc.addAction(new ROL())));
-        addButton(buttonPanel, "RoR", (e -> calc.addAction(new ROR())));
+        addButton(buttonPanel, "RoL", (e -> calc.RoL()));
+        addButton(buttonPanel, "RoR", (e -> calc.RoR()));
         addButton(buttonPanel, "C", (e -> calc.numericInput("C")));
         addButton(buttonPanel, "7", (e -> calc.numericInput("7")));
         addButton(buttonPanel, "8", (e -> calc.numericInput("8")));
@@ -71,7 +69,7 @@ public class Display {
         startY += buttonHeight+gapY;
         addButton(buttonPanel, "Lsh", (e -> calc.addAction(new LSH())));
         addButton(buttonPanel, "Rsh", (e -> calc.addAction(new RSH())));
-        addButton(buttonPanel, "E", (e -> calc.numericInput("")));//todo
+        addButton(buttonPanel, "E", (e -> calc.numericInput("E")));
         addButton(buttonPanel, "1", (e -> calc.numericInput("1")));
         addButton(buttonPanel, "2", (e -> calc.numericInput("2")));
         addButton(buttonPanel, "3", (e -> calc.numericInput("3")));
@@ -85,7 +83,7 @@ public class Display {
         addButton(buttonPanel, "0", (e -> calc.numericInput("0")));
         addButton(buttonPanel, "0", (e -> calc.numericInput("0")));
         addButton(buttonPanel, ",", (e -> calc.numericInput("")));
-        addButton(buttonPanel, "+", (e -> calc.addAction(new Add()))); //todo reszta przycisków tak samo
+        addButton(buttonPanel, "+", (e -> calc.addAction(new Add())));
         addButton(buttonPanel, "=", (e -> calc.wykonaj()));
 
 
@@ -194,10 +192,13 @@ public class Display {
         frame.setVisible(true);
     }
     public void update(){
+//        System.out.println(calc.getValue());
+//        System.out.println(calc.getValueString());
         label.setText(calc.getValueString());
 
 //        System.out.println(calc.getMemorySize().toInt());
         String s = Long.toBinaryString(calc.getValue());
+
         int desiredLength = calc.getMemorySize().toInt();
         if (s.length() > desiredLength) {
             s = s.substring(s.length() - desiredLength);
@@ -290,8 +291,5 @@ public class Display {
 //        System.out.println(s2);
 
     }
-    public void setDisplayLabelBit(String text) {
-        labelBit1.setText(text);
-        labelBit2.setText(text);
-    }
+
 }

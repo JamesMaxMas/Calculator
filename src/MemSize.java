@@ -10,6 +10,20 @@ public enum MemSize {
         };
         return 0;
     }
+    public long convertValue(long value) {
+        switch (this) {
+            case BYTE:
+                return (long) ((byte) (value));
+            case WORD:
+                return (long) ((short) (value));
+            case DWORD:
+                return (long) ((int) (value));
+            case QWORD:
+                return (long) ((long) (value));
+            default:
+                throw new IllegalArgumentException();
+        }
+    }
 
     public long mostSignificantBit() {
         switch (this) {
