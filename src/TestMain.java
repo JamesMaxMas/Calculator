@@ -5,6 +5,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
@@ -355,28 +356,8 @@ public class TestMain {
         calc.setCurrent(5);
         assertEquals(5, calc.getCurrent());
     }
-    @Test
-    public void testWyswietlaczAdd() {
 
-        Frame frame = new Frame("Basic Program");
-        Label label = new Label("Hello World!");
 
-        // Aligning the label to CENTER
-        label.setAlignment(Label.CENTER);
-
-        // Adding Label and Setting
-        // the Size of the Frame
-        frame.add(label);
-        frame.setSize(300, 300);
-
-        // Making the Frame visible
-        frame.setVisible(true);
-
-        calc.setCurrent(Operations.add(5, 1, calc.getMemorySize()));
-        label.setText(Long.toString(calc.current));
-        assertEquals("6", label.getText());
-
-    }
     @Test
     public void testInitialAllowedInput() {
 
@@ -384,7 +365,7 @@ public class TestMain {
 
     }
     @Test
-    public void testNumericInput() {
+    public void testNumericInputPositive() {
         calc.setSystem(NumSystem.DEC);
         calc.numericInput("5");
         assertEquals(calc.getValue(), 5);
@@ -397,6 +378,43 @@ public class TestMain {
         calc.setSystem(NumSystem.HEX);
         calc.numericInput("A");
         assertEquals(calc.getValue(), 10);
+        assertEquals(calc.getValueString(), "A");
+        calc.clear();
+        calc.setSystem(NumSystem.OCT);
+        calc.numericInput("7");
+        assertEquals(calc.getValue(), 7);
+        assertEquals(calc.getValueString(), "7");
+        calc.clear();
+        calc.setSystem(NumSystem.BIN);
+        calc.numericInput("1");
+        assertEquals(calc.getValue(), 1);
+        assertEquals(calc.getValueString(), "1");
+
+
+    }
+    @Test
+    public void testNumericInputNegativ() {
+        calc.clear();
+        calc.setSystem(NumSystem.DEC);
+        calc.numericInput("A");
+        assertEquals(calc.getValue(), 0);
+        assertEquals(calc.getValueString(), "0");
+
+
+        assertEquals(calc.getValue(), 0);
+        assertEquals(calc.getValueString(), "0");
+        calc.clear();
+
+        calc.setSystem(NumSystem.OCT);
+        calc.numericInput("A");
+        assertEquals(calc.getValue(), 0);
+        assertEquals(calc.getValueString(), "0");
+
+        calc.clear();
+        calc.setSystem(NumSystem.BIN);
+        calc.numericInput("A");
+        assertEquals(calc.getValue(), 0);
+        assertEquals(calc.getValueString(), "0");
 
 
     }
@@ -496,6 +514,54 @@ public class TestMain {
         calc.clear();
         assertEquals("0", calc.display.label.getText());
     }
+    @Test
+    public void testNumericOnBoundariesHex() {
+        calc.clear();
+        assertEquals(calc.display.label.getText(), "0");
+        calc.setSystem(NumSystem.HEX); // Ustaw system HEX (bazę 16)
+
+        // Test dla BYTE (limit FF -> 255 w unsigned HEX)
+        calc.setMemorySize(MemSize.BYTE);
+        calc.numericInput("F");
+        assertEquals(calc.display.label.getText(), "F");
+        calc.numericInput("F");
+        assertEquals(calc.display.label.getText(), "FF");
+        calc.numericInput("F");
+        assertEquals("FF", calc.display.label.getText()); // Nie powinno przekroczyć FF (255 w unsigned)
+        calc.clear();
+        assertEquals("0", calc.display.label.getText());
+
+        // Test dla WORD (limit FFFF -> 65535 w unsigned HEX)
+        calc.setMemorySize(MemSize.WORD);
+        calc.numericInput("F");
+        calc.numericInput("F");
+        calc.numericInput("F");
+        calc.numericInput("F");
+        assertEquals("FFFF", calc.display.label.getText());
+        calc.numericInput("F");
+        assertEquals("FFFF", calc.display.label.getText()); // Nie powinno przekroczyć FFFF (65535 w unsigned)
+        calc.clear();
+        assertEquals("0", calc.display.label.getText());
+
+        // Test dla DWORD (limit FFFFFFFF -> 4294967295 w unsigned HEX)
+        calc.setMemorySize(MemSize.DWORD);
+        calc.numericInput("F");
+        calc.numericInput("F");
+        calc.numericInput("F");
+        calc.numericInput("F");
+        calc.numericInput("F");
+        calc.numericInput("F");
+        calc.numericInput("F");
+        calc.numericInput("F");
+        assertEquals("FFFFFFFF", calc.display.label.getText());
+        calc.numericInput("F");
+        assertEquals("FFFFFFFF", calc.display.label.getText()); // Nie powinno przekroczyć FFFFFFFF (4294967295 w unsigned)
+        calc.clear();
+        assertEquals("0", calc.display.label.getText());
+
+
+    }
+
 
     @Test
     public void testBinaryInput() {
@@ -559,6 +625,63 @@ public class TestMain {
         assertEquals("AF1", calculator.getValueString());
         assertEquals(2801, calculator.getValue());
     }
+    @Test
+    public void testSystemConversions() {
+        calc.clear();
+
+        // Test DEC -> BIN
+        calc.setSystem(NumSystem.DEC);
+        calc.setValue(10); // Ustaw wartość 10 w systemie dziesiętnym
+        calc.setSystem(NumSystem.BIN);
+        assertEquals("1010", calc.display.label.getText()); // Oczekiwany wynik w BIN: 1010
+
+        // Test DEC -> HEX
+        calc.setSystem(NumSystem.DEC);
+        calc.setValue(255); // Ustaw wartość 255 w systemie dziesiętnym
+        calc.setSystem(NumSystem.HEX);
+        assertEquals("FF", calc.display.label.getText()); // Oczekiwany wynik w HEX: FF
+        calc.clear();
+        // Test HEX -> DEC (cyfra po cyfrze)
+        calc.setSystem(NumSystem.HEX);
+        calc.numericInput("F"); // Wprowadź F
+        calc.numericInput("F"); // Wprowadź F
+        calc.setSystem(NumSystem.DEC);
+        assertEquals("255", calc.display.label.getText()); // Oczekiwany wynik w DEC: 255
+        calc.clear();
+        // Test BIN -> DEC (cyfra po cyfrze)
+        calc.setSystem(NumSystem.BIN);
+        calc.numericInput("1"); // Wprowadź 1
+        calc.numericInput("0"); // Wprowadź 0
+        calc.numericInput("1"); // Wprowadź 1
+        calc.numericInput("0"); // Wprowadź 0
+        calc.setSystem(NumSystem.DEC);
+        assertEquals("10", calc.display.label.getText()); // Oczekiwany wynik w DEC: 10
+        calc.clear();
+        // Test BIN -> HEX (cyfra po cyfrze)
+        calc.setSystem(NumSystem.BIN);
+        calc.numericInput("1"); // Wprowadź 1
+        calc.numericInput("1"); // Wprowadź 1
+        calc.numericInput("1"); // Wprowadź 1
+        calc.numericInput("1"); // Wprowadź 1
+        calc.numericInput("1"); // Wprowadź 1
+        calc.numericInput("1"); // Wprowadź 1
+        calc.numericInput("1"); // Wprowadź 1
+        calc.numericInput("1"); // Wprowadź 1
+        calc.setSystem(NumSystem.HEX);
+        assertEquals("FF", calc.display.label.getText()); // Oczekiwany wynik w HEX: FF
+        calc.clear();
+        // Test HEX -> BIN (cyfra po cyfrze)
+        calc.setSystem(NumSystem.HEX);
+        calc.numericInput("A"); // Wprowadź A
+        calc.setSystem(NumSystem.BIN);
+        assertEquals("1010", calc.display.label.getText()); // Oczekiwany wynik w BIN: 1010
+
+        // Reset
+        calc.clear();
+        assertEquals("0", calc.display.label.getText());
+    }
+
+
 
     @Test
     public void testMemorySizeByteOverflow() {
@@ -603,24 +726,9 @@ public class TestMain {
         assertEquals("1111111111111111", s); // Truncated to 16 bits for WORD
     }
 
+
     @Test
-    public void testNoTruncationForSmallerValue() {
-        Calculator calculator = new Calculator();
-        calculator.setSystem(NumSystem.BIN);
-        calculator.setMemorySize(MemSize.BYTE);
-
-        calculator.setValue(0b10101010); // 8 bits, within BYTE range
-
-        String s = Long.toBinaryString(calculator.getValue());
-        int desiredLength = calculator.getMemorySize().toInt();
-        if (s.length() > desiredLength) {
-            s = s.substring(s.length() - desiredLength);
-        }
-
-        assertEquals("10101010", s); // No truncation needed
-    }
-    @Test
-    public void test2() {
+    public void changeSign() {
         Calculator calculator = new Calculator();
         calculator.setMemorySize(MemSize.BYTE);
         calculator.numericInput("5");
@@ -629,7 +737,7 @@ public class TestMain {
         assertEquals("373", calculator.display.label.getText()); // No truncation needed
     }
     @Test
-    public void test3() {
+    public void changeSignInverted() {
         Calculator calculator = new Calculator();
         calculator.setMemorySize(MemSize.BYTE);
         calculator.numericInput("5");
@@ -756,4 +864,182 @@ public class TestMain {
         assertEquals("25", calculator.getValueString());
         assertEquals(25, calculator.getValue());
     }
+
+    @Test
+    public void testMemoryClear() {
+        Calculator calculator = new Calculator();
+        calculator.setValue(100);
+        calculator.ms(); // Store current value in memory
+        calculator.mc(); // Clear memory
+
+        assertEquals(0, calculator.getMemory());
+    }
+
+    @Test
+    public void testMemoryRecall() {
+        Calculator calculator = new Calculator();
+        calculator.setValue(50);
+        calculator.ms(); // Store current value in memory
+        calculator.setValue(100); // Change current value
+        calculator.mr(); // Recall memory
+
+        assertEquals(50, calculator.getValue());
+    }
+
+    @Test
+    public void testMemoryStore() {
+        Calculator calculator = new Calculator();
+        calculator.setValue(200);
+        calculator.ms(); // Store current value in memory
+
+        assertEquals(200, calculator.getMemory());
+    }
+
+    @Test
+    public void testMemoryAdd() {
+        Calculator calculator = new Calculator();
+        calculator.setMemory(50);
+        calculator.setValue(30);
+        calculator.mPlus(); // Add current value to memory
+
+        assertEquals(80, calculator.getMemory());
+    }
+
+    @Test
+    public void testMemorySubtract() {
+        Calculator calculator = new Calculator();
+        calculator.setMemory(50);
+        calculator.setValue(30);
+        calculator.mMinus(); // Subtract current value from memory
+
+        assertEquals(20, calculator.getMemory());
+    }
+
+    @Test
+    public void testClearEntry() {
+        Calculator calculator = new Calculator();
+        calculator.setValue(12345);
+        calculator.ce(); // Clear entry
+
+        assertEquals(0, calculator.getValue());
+        assertEquals("0", calculator.getValueString());
+    }
+
+    @Test
+    public void testBackspace() {
+        Calculator calculator = new Calculator();
+        calculator.setSystem(NumSystem.DEC);
+        calculator.setValue(12345);
+        calculator.backspace(); // Remove last digit
+
+        assertEquals(1234, calculator.getValue());
+        assertEquals("1234", calculator.getValueString());
+    }
+
+    @Test
+    public void testRotateLeft() {
+        Calculator calculator = new Calculator();
+        calculator.setSystem(NumSystem.BIN);
+        calculator.setMemorySize(calculator.getMemorySize().BYTE);
+        calculator.setValue(0b10110011); // Example binary value
+        calculator.RoL(); // Rotate left
+
+        assertEquals(0b01100111, calculator.getValue());
+    }
+
+    @Test
+    public void testRotateRight() {
+        Calculator calculator = new Calculator();
+        calculator.setSystem(NumSystem.BIN);
+        calculator.setMemorySize(calculator.getMemorySize().BYTE);
+        calculator.setValue(0b10110011); // Example binary value
+        calculator.RoR(); // Rotate right
+
+        assertEquals(0b11011001, calculator.getValue());
+    }
+
+    @Test
+    public void testNotOperation() {
+        Calculator calculator = new Calculator();
+        calculator.setSystem(NumSystem.BIN);
+        calculator.setMemorySize(calculator.getMemorySize().BYTE);
+        calculator.setValue(0b10110011); // Example binary value
+        calculator.Not(); // Perform NOT operation
+
+        assertEquals(0b01001100, calculator.getValue()); // Inverted value within BYTE size
+    }
+
+    @Test
+    public void testDivZero(){
+       Calculator calculator = new Calculator();
+       calculator.setSystem(NumSystem.DEC);
+       calculator.numericInput("3");
+       calculator.addAction(new DIV());
+       calculator.numericInput("0");
+       calculator.wykonaj();
+       assertEquals(0, calculator.getValue());
+       assertEquals("0", calculator.display.label.getText());
+    }
+
+    @Test
+    public void systemTest(){
+        long val = NumSystem.parseSignedBinary("11111010",2);
+        assertEquals(-6,val);
+    }
+    @Test
+    public void systemTest_2(){
+        long val = NumSystem.parseSignedBinary("1111111111111010",2);
+        assertEquals(-6,val);
+    }
+
+    @Test
+    public void numSystemTestBYTE(){
+        Calculator calculator = new Calculator();
+        calculator.numericInput("2");
+        calculator.numericInput("5");
+        calculator.numericInput("0");
+        calculator.setMemorySize(MemSize.BYTE);
+        assertEquals(calculator.display.label.getText(), "-6");
+
+    }
+
+    @Test
+    public void numSystemTestDWORD(){
+        Calculator calculator = new Calculator();
+        calculator.setValue(1000000000000000L);
+        calculator.setMemorySize(MemSize.DWORD);
+        assertEquals(calculator.display.label.getText(), "-1530494976");
+    }
+
+    @Test
+    public void numSystemTestWORD(){
+        Calculator calculator = new Calculator();
+        calculator.setValue(1000000000000000L);
+        calculator.setMemorySize(MemSize.WORD);
+        assertEquals(calculator.display.label.getText(), "-32768");
+    }
+    @Test
+    public void testDivMul(){
+        Calculator calculator = new Calculator();
+        calculator.setSystem(NumSystem.DEC);
+        calculator.numericInput("3");
+        calculator.addAction(new DIV());
+        calculator.addAction(new MUL());
+        calculator.numericInput("2");
+        calculator.wykonaj();
+        assertEquals(6, calculator.getValue());
+        assertEquals("6", calculator.display.label.getText());
+    }
+    @Test
+    public void testDivFraction(){
+        Calculator calculator = new Calculator();
+        calculator.setSystem(NumSystem.DEC);
+        calculator.numericInput("3");
+        calculator.addAction(new DIV());
+        calculator.numericInput("2");
+        calculator.wykonaj();
+        assertEquals(1, calculator.getValue());
+        assertEquals("1", calculator.display.label.getText());
+    }
+
 }

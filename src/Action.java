@@ -20,11 +20,6 @@ class AND extends Action {
     }
 }
 
-class NOT extends Action {
-    public long wykonaj(long a, long b, MemSize memSize) {
-        return Operations.NOT(a, memSize);
-    }
-}
 
 class OR extends Action {
     public long wykonaj(long a, long b, MemSize memSize) {
@@ -39,6 +34,7 @@ class XOR extends Action {
 }
 class MUL extends Action {
     public long wykonaj(long a, long b, MemSize memSize) {
+
         return Operations.multiply(a,b, memSize);
     }
 }
@@ -50,6 +46,9 @@ class MOD extends Action {
 }
 class DIV extends Action {
     public long wykonaj(long a, long b, MemSize memSize) {
+        if(b == 0L){
+            return 0L;
+        }
         return Operations.divide(a,b, memSize);
     }
 }

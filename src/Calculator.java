@@ -3,11 +3,20 @@ import java.util.*;
 //todo funkcje pamięci kalkulatora
 public class Calculator {
 
+
     private boolean nextResetDisplay;
     private long lastValue;
     private long memory;
     public void setValue(long value) {
         this.value = value;
+    }
+
+    public long getMemory() {
+        return memory;
+    }
+
+    public void setMemory(long memory) {
+        this.memory = memory;
     }
 
     private long value;
@@ -63,6 +72,34 @@ public class Calculator {
 
     public void setMemorySize(MemSize memorySize) {
         this.memorySize = memorySize;
+        if (system == NumSystem.DEC ){
+            System.out.println(value);
+            String s = Long.toBinaryString(value);
+            int desiredLength = memorySize.toInt();
+            if (s.length() > desiredLength) {
+                s = s.substring(s.length() - desiredLength);
+            }
+//            System.out.println(s);
+            long i2 = NumSystem.parseSignedBinary(s, 2); // Parsowanie jako liczby bez znaku
+//            System.out.println(i2);
+            value = i2;
+            valueString = Long.toString(value, system.toInt()).toUpperCase();
+        }else {
+            System.out.println("test");
+
+            String s = Long.toBinaryString(value);
+            int desiredLength = memorySize.toInt();
+            if (s.length() > desiredLength) {
+                s = s.substring(s.length() - desiredLength);
+            }
+            System.out.println(s);
+            long i2 = Long.parseUnsignedLong(s, 2); // Parsowanie jako liczby bez znaku
+            System.out.println(i2);
+            value = i2;
+            valueString = Long.toUnsignedString(value, system.toInt()).toUpperCase();
+
+        }
+
         display.update();
         nextResetDisplay = true;
     }
@@ -76,6 +113,7 @@ public class Calculator {
         value = memorySize.convertValue(value);
 //        System.out.println(value);
         if (system == NumSystem.DEC){
+            System.out.println(value);
             valueString = Long.toString(value, system.toInt()).toUpperCase();
         }else {
             String s = Long.toBinaryString(value);
@@ -146,32 +184,64 @@ public class Calculator {
                 break;
 
         }
+        if (system == NumSystem.DEC){
         switch (memorySize) {
             case BYTE:
                 if (value >= 128){
                     value = lastValue;
-                    valueString = Long.toString(value, system.toInt());
+                    valueString = Long.toString(value, system.toInt()).toUpperCase();;
                 }
                 break;
             case WORD:
                 if (value >= 32767){
                     value = lastValue;
-                    valueString = Long.toString(value, system.toInt());
+                    valueString = Long.toString(value, system.toInt()).toUpperCase();;
                 }
                 break;
             case DWORD:
                 if (value >= 2147483647){
                     value = lastValue;
-                    valueString = Long.toString(value, system.toInt());
+                    valueString = Long.toString(value, system.toInt()).toUpperCase();;
                 }
                 break;
             case QWORD:
                 if (value >= 9223372036854775807L){
                     value = lastValue;
-                    valueString = Long.toString(value, system.toInt());
+                    valueString = Long.toString(value, system.toInt()).toUpperCase();;
                 }
                 break;
         }
+
+            }
+        else{
+            switch (memorySize) {
+                case BYTE:
+                    if (value > 255) { // Maksymalna wartość unsigned dla BYTE
+                        value = lastValue;
+                        valueString = Long.toString(value, system.toInt()).toUpperCase();
+                    }
+                    break;
+                case WORD:
+                    if (value > 65535) { // Maksymalna wartość unsigned dla WORD
+                        value = lastValue;
+                        valueString = Long.toString(value, system.toInt()).toUpperCase();
+                    }
+                    break;
+                case DWORD:
+                    if (value > 4294967295L) { // Maksymalna wartość unsigned dla DWORD
+                        value = lastValue;
+                        valueString = Long.toString(value, system.toInt()).toUpperCase();
+                    }
+                    break;
+//                case QWORD:
+//                    if (value > 18446744073709551615L) { // Maksymalna wartość unsigned dla QWORD
+//                        value = lastValue;
+//                        valueString = Long.toString(value, system.toInt()).toUpperCase();
+//                    }
+//                    break;
+            }
+        }
+
 
          if (valueString.charAt(0) == '0' && valueString.length()>1){
              valueString = valueString.substring(1);
@@ -212,7 +282,6 @@ public class Calculator {
         action = null;
         display.setDisplayLabel(valueString);
     }
-        //todo test
     public void mc() {
         memory = 0;
     }

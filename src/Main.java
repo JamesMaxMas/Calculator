@@ -4,11 +4,13 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 public class Main {
+
     //todo przyciski kalkulatora(pamięć codanie itd), testy, zmiana znaków inna niż sys10 // wyświetlacz bitowy
     //todo jest problem przy wpisywaniu liczby większej niż przyjmuje long
     public static void main(String[] args) {
         Calculator calc = new Calculator();
         calc.display.display();
+//        System.out.println(parseSignedBinary("11111010", 2));
 //        String s = "9999999999999999999";
 //        long l = Long.parseLong(s, 10);
 //        String s = Long.toBinaryString(-5);

@@ -15,6 +15,23 @@ public enum NumSystem {
                 throw new IllegalArgumentException("Unknown operation: " + str);
         }
     }
+    public static long parseSignedBinary(String binary, int base) {
+//        int value = Integer.parseInt(binary, n);
+//        if (binary.length() == 8 && binary.charAt(0) == '1') {
+//            value -= (1 << binary.length()); // Odejmij 2^długość (np. 2^8)
+//        }
+//        return value;
+        long value = Long.parseLong(binary, base);
+        int bitLength = binary.length();
+
+        // Jeśli najstarszy bit (MSB) jest ustawiony, liczba jest ujemna w notacji uzupełnienia do dwóch
+        if (binary.charAt(0) == '1') {
+            // Odejmij 2^bitLength, aby uwzględnić znak
+            value -= (1L << bitLength);
+        }
+
+        return value;
+    }
     public int toInt() {
         switch (this) {
             case DEC : return 10;
